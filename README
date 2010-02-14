@@ -1,0 +1,19 @@
+You'll need something that handles "org.openintents.action.PICK_FILE" . If you don't understand it, just install "OI File Manager" http://www.openintents.org/en/node/159
+
+Install my app: http://veritas-vos-liberabit.com/tmp/2010/Jmdsp.apk (it is an unsigned app)
+
+You'd also need some midi files to be copied to your file system. If you try it on a sim, do this:
+android-sdk-XXX/tools/adb push yoursongfile.mid /sdcard
+
+Running the app:
+
+	- Tap "Load" text to open an open file dialog. Pick a SMF file.
+	- then it tries to load the selected song. When it's done, then
+	  it prints "Loaded". The loading process may take a while.
+	- Tap "Play" button and then it will play the song. The keyboard
+	  may delay right now.
+	- Pause and Stop buttons will crash the app right now :(
+	- Play button won't work twice.
+	- When trying to close the app, it will try to pause, and thus
+	  it will crash :(
+
