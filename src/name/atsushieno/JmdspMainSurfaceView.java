@@ -141,17 +141,17 @@ public class JmdspMainSurfaceView extends Activity {
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				if (play_button.contains(x, y))
-					ProcessPlay();
+					processPlay();
 				else if (pause_button.contains(x, y))
-					ProcessPause();
+					processPause();
 				else if (stop_button.contains(x, y))
-					ProcessStop();
+					processStop();
 				else if (ff_button.contains(x, y))
-					ProcessFastForward();
+					processFastForward();
 				else if (rew_button.contains(x, y))
-					ProcessRewind();
+					processRewind();
 				else if (load_button.contains(x, y))
-					ProcessLoad();
+					processLoad();
 				break;
 			}
 			// TODO Auto-generated method stub
@@ -205,13 +205,13 @@ public class JmdspMainSurfaceView extends Activity {
 				public void run() {
 					if (!needs_redraw)
 						return;
-					UpdateView();
+					updateView();
 				}
 			}, 100, 100, TimeUnit.MILLISECONDS);
 
 		}
 		
-		void UpdateView()
+		void updateView()
 		{
 			Canvas c = getHolder().lockCanvas();
 			if (c != null) {
@@ -427,7 +427,7 @@ public class JmdspMainSurfaceView extends Activity {
 		MidiPlayer midi_player;
 		File midifile;
 
-		void DrawCommon (String s)
+		void drawCommon (String s)
 		{
 			synchronized(paint) {
 				int initX = small_screen ? 300 : 400;
@@ -440,41 +440,41 @@ public class JmdspMainSurfaceView extends Activity {
 				this.needs_redraw = true;
 			}
 		}
-		void ProcessPlay()
+		void processPlay()
 		{
 			if (jet_player == null)
 				return;
 			midi_player.playAsync();
 			jet_player.play();
-			DrawCommon ("PLAY");
+			drawCommon ("PLAY");
 		}
-		void ProcessPause()
+		void processPause()
 		{
 			if (jet_player == null)
 				return;
 			midi_player.pauseAsync();
 			jet_player.pause();
-			DrawCommon ("PAUSE");
+			drawCommon ("PAUSE");
 		}
-		void ProcessStop()
+		void processStop()
 		{
 			if (jet_player == null)
 				return;
 			midi_player.close();
 			jet_player.release();
 			jet_player = null;
-			DrawCommon ("STOP");
+			drawCommon ("STOP");
 		}
-		void ProcessFastForward()
+		void processFastForward()
 		{
-			DrawCommon ("not supported yet");
+			drawCommon ("not supported yet");
 		}
-		void ProcessRewind()
+		void processRewind()
 		{
-			DrawCommon ("not supported yet");
+			drawCommon ("not supported yet");
 		}
 
-		void ProcessLoad()
+		void processLoad()
 		{
 			Intent intent = new Intent("org.openintents.action.PICK_FILE");
 			activity.startActivityForResult(intent, 1);
@@ -482,7 +482,7 @@ public class JmdspMainSurfaceView extends Activity {
 
 		final MidiPlayerCallback callback = this;
 		
-		void LoadFileAsync(File file)
+		void loadFileAsync(File file)
 		{
 			File prevfile = midifile;
 			if (file == prevfile || file == null)
@@ -493,8 +493,8 @@ public class JmdspMainSurfaceView extends Activity {
 					if (jet_player == null)
 						jet_player = JetPlayer.getJetPlayer();
 					try {
-						DrawCommon ("Loading " + midifile.getName());
-						UpdateView();
+						drawCommon ("Loading " + midifile.getName());
+						updateView();
 						FileOutputStream outStream = getContext().openFileOutput("temporary-songfile.jet", Context.MODE_PRIVATE);
 						File jetFile = getContext().getFileStreamPath("temporary-songfile.jet");
 						new SmfToJetConverter ().convert (midifile, outStream);
@@ -504,11 +504,11 @@ public class JmdspMainSurfaceView extends Activity {
 						midi_player.setCallback(callback);
 						jet_player.loadJetFile(jetFile.getAbsolutePath());
 						jet_player.queueJetSegment(0, -1, 0, 0, 0, (byte) 0);
-						DrawCommon ("Loaded");
+						drawCommon ("Loaded");
 					} catch (SmfParserException ex) {
-						DrawCommon ("Parse error " + ex);
+						drawCommon ("Parse error " + ex);
 					} catch (IOException ex) {
-						DrawCommon ("I/O error " + ex);
+						drawCommon ("I/O error " + ex);
 					}
 				}
 			}).start();
@@ -636,7 +636,7 @@ public class JmdspMainSurfaceView extends Activity {
 	public void onPause()
 	{
 		super.onPause();
-		view.ProcessPause();
+		view.processPause();
 	}
 	
 	@Override
@@ -658,7 +658,7 @@ public class JmdspMainSurfaceView extends Activity {
 			if (filename.startsWith("file://"))
 				filename = filename.substring(7); // remove URI prefix
 			
-			this.view.LoadFileAsync (new File (filename));
+			this.view.loadFileAsync (new File (filename));
     	}
 	}
 
