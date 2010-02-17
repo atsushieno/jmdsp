@@ -412,7 +412,7 @@ public class JmdspMainSurfaceView extends Activity {
 			rew_button = getRect (left_base + 90, 50 + 34, paint.measureText("Rew"), 8);
 			load_button = getRect (left_base + 130, 50 + 34, paint.measureText("Load"), 8);
 
-			paint.setTextSize(10);
+			paint.setTextSize(14);
 			paint.setColor(color_dark);
 			paint.setStyle(Style.FILL);
 			canvas.drawText("Play", play_button.left, play_button.bottom, paint);
