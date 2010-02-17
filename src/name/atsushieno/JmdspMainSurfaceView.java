@@ -405,14 +405,14 @@ public class JmdspMainSurfaceView extends Activity {
 		void setupPlayerStatusPanel()
 		{
 			left_base= small_screen ? 280 : 400;
-			play_button = getRect (left_base + 50, 50 + 20, paint.measureText("Play"), 8);
-			pause_button = getRect (left_base + 90, 50 + 20, paint.measureText("Pause"), 8);
-			stop_button = getRect (left_base + 130, 50 + 20, paint.measureText("Stop"), 8);
-			ff_button = getRect (left_base + 50, 50 + 34, paint.measureText("FF"), 8);
-			rew_button = getRect (left_base + 90, 50 + 34, paint.measureText("Rew"), 8);
-			load_button = getRect (left_base + 130, 50 + 34, paint.measureText("Load"), 8);
-
 			paint.setTextSize(14);
+			play_button = getRect (left_base + 50, 50 + 20, paint.measureText("Play"), 14);
+			pause_button = getRect (left_base + 90, 50 + 20, paint.measureText("Pause"), 14);
+			stop_button = getRect (left_base + 130, 50 + 20, paint.measureText("Stop"), 14);
+			ff_button = getRect (left_base + 50, 50 + 40, paint.measureText("FF"), 14);
+			rew_button = getRect (left_base + 90, 50 + 40, paint.measureText("Rew"), 14);
+			load_button = getRect (left_base + 130, 50 + 40, paint.measureText("Load"), 14);
+
 			paint.setColor(color_dark);
 			paint.setStyle(Style.FILL);
 			canvas.drawText("Play", play_button.left, play_button.bottom, paint);
@@ -433,10 +433,10 @@ public class JmdspMainSurfaceView extends Activity {
 				int initX = small_screen ? 300 : 400;
 				paint.setStyle (Paint.Style.FILL_AND_STROKE);
 				paint.setColor (color_background);
-				canvas.drawRect(initX, 100, 400, 120, paint);
+				canvas.drawRect(initX, 110, 400, 140, paint);
 				paint.setColor (color_dark);
 				paint.setTextSize(16);
-				canvas.drawText(s, initX, 120, paint);
+				canvas.drawText(s, initX, 140, paint);
 				this.needs_redraw = true;
 			}
 		}
