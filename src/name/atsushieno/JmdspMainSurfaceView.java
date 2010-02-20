@@ -442,7 +442,7 @@ public class JmdspMainSurfaceView extends Activity {
 		}
 		void processPlay()
 		{
-			if (jet_player == null)
+			if (jet_player == null || midi_player == null)
 				return;
 			midi_player.playAsync();
 			jet_player.play();
@@ -450,7 +450,7 @@ public class JmdspMainSurfaceView extends Activity {
 		}
 		void processPause()
 		{
-			if (jet_player == null)
+			if (jet_player == null || midi_player == null)
 				return;
 			midi_player.pauseAsync();
 			jet_player.pause();
@@ -458,11 +458,10 @@ public class JmdspMainSurfaceView extends Activity {
 		}
 		void processStop()
 		{
-			if (jet_player == null)
+			if (jet_player == null || midi_player == null)
 				return;
 			midi_player.close();
-			jet_player.release();
-			jet_player = null;
+			jet_player.pause();
 			drawCommon ("STOP");
 		}
 		void processFastForward()
@@ -481,7 +480,9 @@ public class JmdspMainSurfaceView extends Activity {
 		}
 
 		final MidiPlayerCallback callback = this;
-		
+		SmfMusic smf_music;
+		File jetfile;
+
 		void loadFileAsync(File file)
 		{
 			File prevfile = midifile;
@@ -496,13 +497,14 @@ public class JmdspMainSurfaceView extends Activity {
 						drawCommon ("Loading " + midifile.getName());
 						updateView();
 						FileOutputStream outStream = getContext().openFileOutput("temporary-songfile.jet", Context.MODE_PRIVATE);
-						File jetFile = getContext().getFileStreamPath("temporary-songfile.jet");
+						jetfile = getContext().getFileStreamPath("temporary-songfile.jet");
 						new SmfToJetConverter ().convert (midifile, outStream);
 						SmfReader r = new SmfReader(new FileInputStream(midifile));
 						r.parse();
-						midi_player = new MidiPlayer (r.getMusic());
+						smf_music = r.getMusic();
+						midi_player = new MidiPlayer (smf_music);
 						midi_player.setCallback(callback);
-						jet_player.loadJetFile(jetFile.getAbsolutePath());
+						jet_player.loadJetFile(jetfile.getAbsolutePath());
 						jet_player.queueJetSegment(0, -1, 0, 0, 0, (byte) 0);
 						drawCommon ("Loaded");
 					} catch (SmfParserException ex) {
