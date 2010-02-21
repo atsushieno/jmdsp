@@ -405,13 +405,14 @@ public class JmdspMainSurfaceView extends Activity {
 		void setupPlayerStatusPanel()
 		{
 			left_base= small_screen ? 280 : 400;
-			paint.setTextSize(14);
-			play_button = getRect (left_base + 50, 50 + 20, paint.measureText("Play"), 14);
-			pause_button = getRect (left_base + 90, 50 + 20, paint.measureText("Pause"), 14);
-			stop_button = getRect (left_base + 130, 50 + 20, paint.measureText("Stop"), 14);
-			ff_button = getRect (left_base + 50, 50 + 40, paint.measureText("FF"), 14);
-			rew_button = getRect (left_base + 90, 50 + 40, paint.measureText("Rew"), 14);
-			load_button = getRect (left_base + 130, 50 + 40, paint.measureText("Load"), 14);
+			int size = 16;
+			paint.setTextSize(size);
+			play_button = getRect (left_base + 50, 50 + 20, paint.measureText("Play"), size);
+			pause_button = getRect (left_base + 100, 50 + 20, paint.measureText("Pause"), size);
+			stop_button = getRect (left_base + 150, 50 + 20, paint.measureText("Stop"), size);
+			ff_button = getRect (left_base + 50, 50 + 40, paint.measureText("FF"), size);
+			rew_button = getRect (left_base + 100, 50 + 40, paint.measureText("Rew"), size);
+			load_button = getRect (left_base + 150, 50 + 40, paint.measureText("Load"), size);
 
 			paint.setColor(color_dark);
 			paint.setStyle(Style.FILL);
