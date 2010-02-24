@@ -443,26 +443,45 @@ public class JmdspMainSurfaceView extends Activity {
 		}
 		void processPlay()
 		{
-			if (jet_player == null || midi_player == null)
+			if (smf_music == null)
 				return;
-			midi_player.playAsync();
-			jet_player.play();
+			if (jet_player == null) {
+				jet_player = JetPlayer.getJetPlayer();
+				jet_player.loadJetFile(jetfile.getAbsolutePath());
+				jet_player.queueJetSegment(0, -1, 0, 0, 0, (byte) 0);
+			}
+			if (midi_player == null) {
+				midi_player = new MidiPlayer (smf_music);
+				midi_player.setCallback(callback);
+			}
+			// This state check is not necessary for MidiPlayer, 
+			// but for JetPlayer (which does not expose state). 
+			if (midi_player.getState() != PlayerState.Playing) {
+				midi_player.playAsync();
+				jet_player.play();
+			}
 			drawCommon ("PLAY");
 		}
 		void processPause()
 		{
-			if (jet_player == null || midi_player == null)
+			if (midi_player == null)
 				return;
 			midi_player.pauseAsync();
-			jet_player.pause();
+			if (jet_player != null)
+				jet_player.pause();
 			drawCommon ("PAUSE");
 		}
 		void processStop()
 		{
-			if (jet_player == null || midi_player == null)
+			if (midi_player == null)
 				return;
 			midi_player.close();
-			jet_player.pause();
+			midi_player = null;
+			if (jet_player != null) {
+				jet_player.pause();
+				jet_player.release();
+				jet_player = null;
+			}
 			drawCommon ("STOP");
 		}
 		void processFastForward()
@@ -492,8 +511,6 @@ public class JmdspMainSurfaceView extends Activity {
 			midifile = file;
 			new Thread (new Runnable () {
 				public void run() {
-					if (jet_player == null)
-						jet_player = JetPlayer.getJetPlayer();
 					try {
 						drawCommon ("Loading " + midifile.getName());
 						updateView();
@@ -503,10 +520,7 @@ public class JmdspMainSurfaceView extends Activity {
 						SmfReader r = new SmfReader(new FileInputStream(midifile));
 						r.parse();
 						smf_music = r.getMusic();
-						midi_player = new MidiPlayer (smf_music);
-						midi_player.setCallback(callback);
-						jet_player.loadJetFile(jetfile.getAbsolutePath());
-						jet_player.queueJetSegment(0, -1, 0, 0, 0, (byte) 0);
+						smf_music = SmfTrackMerger.merge (smf_music);
 						drawCommon ("Loaded");
 					} catch (SmfParserException ex) {
 						drawCommon ("Parse error " + ex);

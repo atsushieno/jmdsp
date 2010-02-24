@@ -9,7 +9,10 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 	public MidiSyncPlayer (SmfMusic music)
 	{
 		this.music = music;
-		events = SmfTrackMerger.merge (music).tracks.get(0).events;
+		if (music.tracks.size() != 1)
+			events = SmfTrackMerger.merge (music).tracks.get(0).events;
+		else
+			events = music.tracks.get(0).events;
 		state = PlayerState.Stopped;
 	}
 
@@ -38,8 +41,6 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 
 	public void play ()
 	{
-		if (player_thread != null && player_thread.getState() == State.WAITING)
-			player_thread.notify();
 		state = PlayerState.Playing;
 	}
 
@@ -62,8 +63,13 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 
 	public void seek (int milliseconds)
 	{
+		state = PlayerState.Paused;
 		int v = 0;
 		play_delta_time = 0;
+		if (milliseconds == 0) { // head
+			event_idx = 0;
+			return;
+		}
 		for (event_idx = 0; event_idx < events.size(); event_idx++) {
 			SmfEvent e = events.get (event_idx);
 			int l = getDeltaTimeInMilliseconds (e.deltaTime);
@@ -74,7 +80,6 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 			}
 			play_delta_time += e.deltaTime;
 		}
-		state = PlayerState.Paused;
 	}
 
 	int event_idx = 0;
@@ -85,21 +90,17 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 		this.callback = callback;
 	}
 
-	Thread player_thread;
-
 	public void playerLoop ()
 	{
-		if (player_thread != null)
-			stop();
-
-		player_thread = Thread.currentThread();
 		allControlReset ();
 		try {
 			while (true) {
-				if (state == PlayerState.Paused)
-					player_thread.wait();
 				if (do_stop)
 					break;
+				if (state == PlayerState.Paused) {
+					Thread.sleep(100);
+					continue;
+				}
 				if (do_pause) {
 					do_pause = false;
 					state = PlayerState.Paused;
@@ -119,7 +120,6 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 		if (event_idx == events.size())
 			if (callback != null)
 				callback.onFinished ();
-		player_thread = null;
 		event_idx = 0;
 	}
 
@@ -154,10 +154,7 @@ public class MidiSyncPlayer implements IMidiPlayerStatus
 
 	public void stop ()
 	{
-		if (state != PlayerState.Stopped) {
+		if (state != PlayerState.Stopped)
 			do_stop = true;
-			if (player_thread != null && player_thread.getState() == State.WAITING)
-				player_thread.notify ();
-		}
 	}
 }
