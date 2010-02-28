@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import android.net.Uri;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -26,6 +28,7 @@ import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.JetPlayer;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -424,7 +427,7 @@ public class JmdspMainSurfaceView extends Activity {
 			canvas.drawText("Load", load_button.left, load_button.bottom, paint);
 		}
 
-		JetPlayer jet_player;
+		MediaPlayer media_player;
 		MidiPlayer midi_player;
 		File midifile;
 
@@ -445,10 +448,16 @@ public class JmdspMainSurfaceView extends Activity {
 		{
 			if (smf_music == null)
 				return;
-			if (jet_player == null) {
-				jet_player = JetPlayer.getJetPlayer();
-				jet_player.loadJetFile(jetfile.getAbsolutePath());
-				jet_player.queueJetSegment(0, -1, 0, 0, 0, (byte) 0);
+			if (media_player == null) {
+				try {
+					media_player = new MediaPlayer ();
+					media_player.setDataSource(jetfile.getAbsolutePath().toLowerCase());
+					media_player.prepare();
+				} catch (IOException ex) {
+					media_player = null;
+					drawCommon ("failed to load SMF");
+					return;
+				}
 			}
 			if (midi_player == null) {
 				midi_player = new MidiPlayer (smf_music);
@@ -458,7 +467,7 @@ public class JmdspMainSurfaceView extends Activity {
 			// but for JetPlayer (which does not expose state). 
 			if (midi_player.getState() != PlayerState.Playing) {
 				midi_player.playAsync();
-				jet_player.play();
+				media_player.start();
 			}
 			drawCommon ("PLAY");
 		}
@@ -467,8 +476,8 @@ public class JmdspMainSurfaceView extends Activity {
 			if (midi_player == null)
 				return;
 			midi_player.pauseAsync();
-			if (jet_player != null)
-				jet_player.pause();
+			if (media_player != null)
+				media_player.pause();
 			drawCommon ("PAUSE");
 		}
 		void processStop()
@@ -477,10 +486,9 @@ public class JmdspMainSurfaceView extends Activity {
 				return;
 			midi_player.close();
 			midi_player = null;
-			if (jet_player != null) {
-				jet_player.pause();
-				jet_player.release();
-				jet_player = null;
+			if (media_player != null) {
+				media_player.stop();
+				media_player = null;
 			}
 			drawCommon ("STOP");
 		}
@@ -514,9 +522,7 @@ public class JmdspMainSurfaceView extends Activity {
 					try {
 						drawCommon ("Loading " + midifile.getName());
 						updateView();
-						FileOutputStream outStream = getContext().openFileOutput("temporary-songfile.jet", Context.MODE_PRIVATE);
-						jetfile = getContext().getFileStreamPath("temporary-songfile.jet");
-						new SmfToJetConverter ().convert (midifile, outStream);
+						jetfile = midifile;
 						SmfReader r = new SmfReader(new FileInputStream(midifile));
 						r.parse();
 						smf_music = r.getMusic();
